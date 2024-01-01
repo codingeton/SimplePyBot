@@ -1,52 +1,46 @@
-import re
-import long_responses as long
-import text_methods as text
+from tkinter import *
+import responses as rp
 
-def message_probability(user_message, recognised_words, single_response=False, required_words=[]):
-    message_certainity = 0
-    has_required_words = True
+def bot_reply():
+    question = questionField.get()
+    question = question.capitalize()
+    botResponse = rp.get_response(question)
+    textArea.insert(END, 'YOU: ' + question+'\n\n')
+    textArea.insert(END, 'BOT: '+ str(botResponse)+'\n\n')
+    textArea.yview(END)
+    questionField.delete(0, END)
 
-    for word in user_message:
-        if word in recognised_words:
-            message_certainity += 1
+root = Tk()
 
-    percentage = float(message_certainity)/float(len(recognised_words))
+root.geometry('500x570+100+30')
+root.title('Test Chatbot')
+root.config(bg='seashell3')
 
-    for word in required_words:
-        if word not in user_message:
-            has_required_words = False
-            break
+# logopic=PhotoImage(file='xyz.png')
 
-    if has_required_words or single_response:
-        return int(percentage*100)
+# logoPicLabel = Label(root, image=logopic)
+# logoPicLabel.pack()
+centreFrame=Frame(root)
+centreFrame.pack()
 
-    else:
-        return 0
+scrollBar = Scrollbar(centreFrame)
+scrollBar.pack(side=RIGHT)
 
-def check_all_messages(message):
-    highest_prob_list = {}
+textArea = Text(centreFrame,font=('times new roman',20), height=10, yscrollcommand=scrollBar.set
+                ,wrap='word')
+textArea.pack(side=LEFT)
+scrollBar.config(command=textArea.yview)
 
-    def response(bot_response, list_of_words, single_response=False, required_words=[]):
-        nonlocal highest_prob_list
-        highest_prob_list[bot_response] = message_probability(message, list_of_words, single_response, required_words)
 
-    # Generate responses
-    response('Hello there this is Globot!', ['hello','hi','ssup','hey','heya'], single_response=True)
-    response('I\m doing fine, and you?',['how','are','you','doing'], required_words=['how'])
-    response('Thank you', ['i','love','coding'], required_words=['love','coding'])
-    response('Cycle is at 2 am, 4 am, 6 am',['update','cycle'], required_words=['when','update','cycle'])
-    response(text.text_one(), ['text', 'test'], single_response = True)
+questionField = Entry(root, font=('verdana',20))
+questionField.pack(pady=15,fill=X)
 
-    best_match = max(highest_prob_list, key=highest_prob_list.get)
-    #print(highest_prob_list)
+submitButton=Button(root, text='Ask Globot', command=bot_reply)
+submitButton.pack()
 
-    return long.unknown() if highest_prob_list[best_match] < 1 else best_match
+def click(event):
+    submitButton.invoke()
 
-def get_response(user_input):
-    split_message = re.split(r'\s+|[,;?!.-]\s*', user_input.lower())
-    response = check_all_messages(split_message)
-    return response
+root.bind('<Return>', click)
 
-#Testing the response system
-while True:
-    print('Bot: '+ get_response(input('You: ')))
+root.mainloop()
